@@ -1,18 +1,14 @@
+from app import fbconfig
 import requests
-import json
-
-# 할 것
-# 토큰 처리
-# flask 인코딩 처리
 
 app_id = " "
 app_secret = " "
 # access_token = app_id + "|" + app_secret
-page_id = "482012061908784"
 limit = 20
-access_token = "EAACEdEose0cBALOzzMDbSevLgeZB9eh6e2SyrSV3C3BFEXxSrlYkTZBG8EBqxvWVTkdkks871FEsFQbONVClv0nwz19UfILFNHdwA8r8wVOqWB2qaY60ldIZCBIHATP7LddzkHkZAZCG4uZBOyZBwieiDWJ7kmvZAAG7BVhhR33xdBIbYA8foLS2pufOSt2jSUD8hySfmDx8cAZDZD"
+access_token = fbconfig.access_token
 
 
+# test
 def test_facebook_page_data(page_id):
     print('call test_facebook_page_data()')
     base = "https://graph.facebook.com/v2.11"
@@ -23,6 +19,8 @@ def test_facebook_page_data(page_id):
     resp = requests.get(url)
     return resp.json()
 
+
+# test
 def test_facebook_page_feed_data(page_id):
     print('call test_facebook_page_feed_data()')
     base = "https://graph.facebook.com/v2.11"  # Graph Api 현재 버전에 맞춤
@@ -35,9 +33,12 @@ def test_facebook_page_feed_data(page_id):
     return resp.json()
 
 
-def request_until_succeed(url):
-    resp = requests.get(url)
-    return resp.json()
+def request_data_to_facebook(url):
+    custom_headers = {
+        'Content-Type': 'application/json;charset=UTF-8'
+    }
+    req = requests.get(url, headers=custom_headers)
+    return req.json()
 
 
 def create_url(base, node, parameters):
@@ -45,9 +46,45 @@ def create_url(base, node, parameters):
     return url
 
 
+def get_facebook_page_feed_url(base, page, token):
+    # parameters setting
+    fields = "/?fields=feed.limit(%d){created_time,id,message,shares,full_picture}" % limit
+    url = base + page + fields + token
+    return url
+
+
 def get_facebook_page_feed_data(page_id):
     print('call test_facebook_page_feed_data()')
     base = "https://graph.facebook.com/v2.11"
-    node = "/" + page_id + "/feed"
-    parameters = "/?fields=message,link,created_time,name,id&access_token=%s" % access_token
-    return request_until_succeed(create_url(base, node, parameters));
+    page = "/" + page_id
+    token = "&access_token=%s" % access_token
+    url = get_facebook_page_feed_url(base, page, token)
+
+    resp_data = request_data_to_facebook(url)
+    print(resp_data)
+
+    # 예외처리
+    # 1. 토큰이 만료된 경우
+    # 2. response에 feed가 없는 경우
+    datalist = resp_data['feed']    # json x dictionary o
+
+    _crawledData = []
+
+    i = 0
+    for data in datalist['data']:
+        # 데이터 예외처리
+        _data = {
+            'community': '',
+            'boardAddr': data['id'],
+            'title': '',
+            'author': '',
+            'content': data['message'],
+            'images': data['full_picture'],
+            'createdDate': data['created_time']
+        }
+        _crawledData.append(_data)
+        i = i + 1
+
+    print("총 데이터 %d개" % i)
+
+    return _crawledData

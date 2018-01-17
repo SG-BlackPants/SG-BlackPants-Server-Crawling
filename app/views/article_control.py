@@ -20,5 +20,5 @@ def crawling_test():
 @mod.route('/facebook/<page_id>', methods=['GET'])
 def crawling_from_facebook(page_id):
     crawled_data = facebook.get_facebook_page_feed_data(page_id)
-    return json.dumps({'crawling_result': crawled_data}, ensure_ascii=False)  # json....처리 어떡하지...?ㅋㅋㅋㅋㅋㅋㅋㅋ
+    return jsonify({'result': crawled_data})
 
