@@ -1,3 +1,5 @@
+
+
 """
     _id             : ObjectID
     community       : String
@@ -9,23 +11,23 @@
     createdDate     : Date
 """
 
+class Facebook:
+    def __init__(self, **kwargs):
+        self.boardAddr = kwargs.get('id', '0')
+        self.content = kwargs.get('message', '')
+        self.images = kwargs.get('full_picture', '')
+        self.createDate = kwargs.get('created_time', '')
+        self.community = 'facebook' +'/' + kwargs.get('page_id', '')
+        self.title = ''
+        self.author = ''
 
-class Article:
-    def __init__(self, community, board_address, title, author, content, images, createdDate):
-        self.community = community
-        self.board_address = board_address
-        self.title = title
-        self.author = author
-        self.content = content
-        self.images = images
-        self.createDate = createdDate
-
-    @property
-    def community(self):
-        return self.community
-
-    @community.setter
-    def community(self, community):
-        self.community = community
-
-
+    def to_json(self):
+        return dict(
+            community=self.community,
+            boardAddr=self.boardAddr,
+            content=self.content,
+            images=self.images,
+            createdDate=self.createDate,
+            title=self.title,
+            author=self.author
+        )
