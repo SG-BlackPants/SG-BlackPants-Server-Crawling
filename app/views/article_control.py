@@ -1,6 +1,6 @@
 # -- coding: utf-8 --
 from flask import Blueprint, Response, jsonify, make_response
-from app.crawling import beautifulsoup_test, facebook
+from app.crawling import beautifulsoup_test, facebook, everytime
 from app.fbconfig import community_list
 
 mod = Blueprint('article', __name__, url_prefix='/article')
@@ -33,3 +33,15 @@ def crawling_from_facebook(univ_name, number):
         page_id = community_list[univ_name][_number]['id']
         crawled_data = facebook.get_facebook_page_feed_data(page_id)
         return jsonify({'result': crawled_data})
+
+
+# test
+@mod.route('/everytime/<id>/<pw>', methods=['GET'])
+def crawling_from_everytime_test(id, pw):
+    notices = everytime.get_everytime_data(id, pw)
+    result = []
+    for n in notices:
+        _data = dict(data=n.text.strip())
+        result.append(_data)
+    # result = everytime.get_everytime_data()
+    return jsonify({'result': result})

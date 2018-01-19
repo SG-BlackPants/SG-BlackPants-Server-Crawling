@@ -63,27 +63,29 @@ def get_facebook_page_feed_data(page_id):
 
     resp_data = request_data_to_facebook(url)
 
-    # 예외처리
-    # 1. 토큰이 만료된 경우....? 만료 되었다는 걸 아는 순간은 request를 받고난 뒤..!
-    # 2. response에 feed가 없는 경우
-    datalist = resp_data['feed']    # json x dictionary o
-
+    i = 0
     _crawledData = []
 
-    i = 0
-    for data in datalist['data']:
-        try:
-            data['page_id'] = page_id  # pageid는 직접 지정
-            
-            _data = Facebook(**data)  # kwargs 형태로 전달
-            print(_data.to_json())
-            _crawledData.append(_data.to_json())
-            i = i + 1
-        except Exception as e:
-            print(e)
+    # 예외처리
+    try:
+        datalist = resp_data['feed']    # json x dictionary o
+        for data in datalist['data']:
+            try:
+                data['page_id'] = page_id  # pageid는 직접 지정
+                _data = Facebook(**data)  # kwargs 형태로 전달
+                # print(_data.to_json())
+                _crawledData.append(_data.to_json())
+                i = i + 1
+            except Exception as e:
+                print(e)
 
+    except Exception as e:
+        # 토큰이 만료된 경우 에러 (만료 되었다는 걸 아는 순간은 request를 받고난 뒤..!)
+        # response에 feed가 없는 경우
+        print(e)
+    
     # insert_to_database(_crawledData) # DB insert 테스트 완료
-    print("총 데이터 %d개" % i)
+    print("count of Data : %d" % i)
 
     return _crawledData
 

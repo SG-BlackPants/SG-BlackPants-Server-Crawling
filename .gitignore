@@ -1,4 +1,5 @@
 .idea
-env
+venv
+venv1
 __pycache__
-/app/fbconfig.py
+app/fbconfig.py
