@@ -1,5 +1,5 @@
 # -- coding: utf-8 --
-from flask import Blueprint, Response, jsonify, make_response
+from flask import Blueprint, Response, jsonify, request
 from app.crawling import beautifulsoup_test, facebook, everytime
 from app.fbconfig import community_list
 
@@ -35,13 +35,17 @@ def crawling_from_facebook(univ_name, number):
         return jsonify({'result': crawled_data})
 
 
-# test
-@mod.route('/everytime/<id>/<pw>', methods=['GET'])
-def crawling_from_everytime_test(id, pw):
-    notices = everytime.get_everytime_data(id, pw)
-    result = []
-    for n in notices:
-        _data = dict(data=n.text.strip())
-        result.append(_data)
-    # result = everytime.get_everytime_data()
+@mod.route('/everytime/<board_num>/<start_page>/<end_page>', methods=['POST'])
+def crawling_from_everytime(board_num, start_page, end_page):
+    id = request.json['id']
+    pw = request.json['pw']
+    result = everytime.get_everytime_all_data(id, pw, board_num, start_page, end_page)
+    return jsonify({'result': result})
+
+
+@mod.route('/everytime/<keyword>', methods=['POST'])
+def crawling_from_everytime_by_keyword(keyword):
+    id = request.json['id']
+    pw = request.json['pw']
+    result = everytime.get_everytime_data_by_keyword(id, pw, keyword)
     return jsonify({'result': result})

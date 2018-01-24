@@ -21,7 +21,7 @@ class Facebook:
         self.title = ''
         self.author = ''
 
-    def to_json(self):
+    def to_dict(self):
         return dict(
             community=self.community,
             boardAddr=self.boardAddr,

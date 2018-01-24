@@ -74,7 +74,7 @@ def get_facebook_page_feed_data(page_id):
                 data['page_id'] = page_id  # pageid는 직접 지정
                 _data = Facebook(**data)  # kwargs 형태로 전달
                 # print(_data.to_json())
-                _crawledData.append(_data.to_json())
+                _crawledData.append(_data.to_dict())
                 i = i + 1
             except Exception as e:
                 print(e)

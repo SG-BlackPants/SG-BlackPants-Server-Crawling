@@ -3,3 +3,4 @@ venv
 venv1
 __pycache__
 app/fbconfig.py
+ghostdriver.log
