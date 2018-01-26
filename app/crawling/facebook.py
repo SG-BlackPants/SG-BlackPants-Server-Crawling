@@ -1,3 +1,22 @@
+from bs4 import BeautifulSoup
+from selenium import webdriver
+import time
+
+
+def get_facebook_page_all_data(email, password, url):
+    driver = webdriver.Chrome('C:/Users/user/Desktop/chromedriver/chromedriver')
+    driver.get('https://www.facebook.com/')
+    driver.find_element_by_name('email').send_keys(email)
+    driver.find_element_by_name('pass').send_keys(password)
+    driver.find_element_by_xpath('//*[@id="loginbutton"]').click()
+    driver.get(url)
+    time.sleep(5)
+    driver.execute_script("window.scrollTo(0,1080)")
+    time.sleep(5)
+    driver.execute_script("window.scrollTo(0,1080)")
+
+
+# 버려야 할 듯..? ㅠㅠ
 from app import fbconfig, mongo
 from app.model.article import Facebook
 import requests
@@ -7,31 +26,6 @@ app_secret = " "
 # access_token = app_id + "|" + app_secret
 limit = 5
 access_token = fbconfig.access_token
-
-
-# test
-def test_facebook_page_data(page_id):
-    print('call test_facebook_page_data()')
-    base = "https://graph.facebook.com/v2.11"
-    node = "/" + page_id
-    parameters = "/?access_token=%s" % access_token
-    url = base + node + parameters
-
-    resp = requests.get(url)
-    return resp.json()
-
-
-# test
-def test_facebook_page_feed_data(page_id):
-    print('call test_facebook_page_feed_data()')
-    base = "https://graph.facebook.com/v2.11"  # Graph Api 현재 버전에 맞춤
-    # node = "/" + page_id + "/feed"
-    node = "/" + page_id + "/feed"
-    parameters = "/?access_token=%s" % access_token
-    url = base + node + parameters
-
-    resp = requests.get(url)
-    return resp.json()
 
 
 def request_data_to_facebook(url):

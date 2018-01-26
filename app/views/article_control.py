@@ -17,7 +17,7 @@ def crawling_test():
     return Response(status=200)
 
 
-# page_id를 받는 게 아니고, kyunghee/1 이런 식으로 받자
+# GraphAPI 사용 크롤링
 @mod.route('/facebook/<univ_name>/<number>', methods=['GET'])
 def crawling_from_facebook(univ_name, number):
     print('called crawling_from_facebook()')
@@ -35,17 +35,27 @@ def crawling_from_facebook(univ_name, number):
         return jsonify({'result': crawled_data})
 
 
+@mod.route('/facebook/<univ_name>/<number>', methods=['POST'])
+def crawling_from_facebook_by_selenium(univ_name, number):
+    print('called crawling from facebook by selenium')
+    email = request.json['email']
+    password = request.json['pw']
+
+    _number = int(number)
+
+    if (_number < 0 or
+            _number >= len(community_list[univ_name])):
+        print('number에 문제가 있군요')
+        return jsonify({'result': "잘못된 요청 또는 URL을 전달하였습니다"})
+    else:
+        url = community_list[univ_name][_number]['url']
+        result = facebook.get_facebook_page_all_data(email, password, url)
+        return jsonify({'result': result})
+
+
 @mod.route('/everytime/<board_num>/<start_page>/<end_page>', methods=['POST'])
 def crawling_from_everytime(board_num, start_page, end_page):
     id = request.json['id']
     pw = request.json['pw']
     result = everytime.get_everytime_all_data(id, pw, board_num, start_page, end_page)
-    return jsonify({'result': result})
-
-
-@mod.route('/everytime/<keyword>', methods=['POST'])
-def crawling_from_everytime_by_keyword(keyword):
-    id = request.json['id']
-    pw = request.json['pw']
-    result = everytime.get_everytime_data_by_keyword(id, pw, keyword)
     return jsonify({'result': result})
