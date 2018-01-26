@@ -1,19 +1,49 @@
 from bs4 import BeautifulSoup
 from selenium import webdriver
 import time
-
+import config
 
 def get_facebook_page_all_data(email, password, url):
-    driver = webdriver.Chrome('C:/Users/user/Desktop/chromedriver/chromedriver')
+    driver = webdriver.Chrome(config.Chrome_driver_path)
     driver.get('https://www.facebook.com/')
     driver.find_element_by_name('email').send_keys(email)
     driver.find_element_by_name('pass').send_keys(password)
     driver.find_element_by_xpath('//*[@id="loginbutton"]').click()
     driver.get(url)
     time.sleep(5)
-    driver.execute_script("window.scrollTo(0,1080)")
+    driver.execute_script("window.scrollTo(0,2500)") # 나중에 숫자 말고 화면 높이로 변경 ㄱ
     time.sleep(5)
-    driver.execute_script("window.scrollTo(0,1080)")
+    driver.execute_script("window.scrollTo(0,2500)")
+    time.sleep(5)
+    driver.execute_script("window.scrollTo(0,2500)")
+    time.sleep(5)
+
+    html = driver.page_source
+    soup = BeautifulSoup(html, 'html.parser')
+
+    all = soup.find_all('div', {'class': '_1dwg _1w_m _q7o'})
+
+    for feed in all:
+        contents = feed.find_all('', {'class': '_5pbx userContent'})
+
+        if not contents:  # contents = []
+            pass
+        else:
+            content = contents[0]
+            print(content.p)
+
+        imageurl_list = []
+
+        imagediv = feed.find_all('a', {'class': '_5dec _xcx'})
+
+        for image in imagediv:
+            imageurl = image['data-ploi']
+            imageurl_list.append(imageurl)
+        print(imageurl_list)
+
+    articles = []
+    return articles
+
 
 
 # 버려야 할 듯..? ㅠㅠ
