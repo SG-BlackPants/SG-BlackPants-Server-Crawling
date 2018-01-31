@@ -1,62 +1,10 @@
-from bs4 import BeautifulSoup
-from selenium import webdriver
-import time
-import config
-
-def get_facebook_page_all_data(email, password, url):
-    driver = webdriver.Chrome(config.Chrome_driver_path)
-    driver.get('https://www.facebook.com/')
-    driver.find_element_by_name('email').send_keys(email)
-    driver.find_element_by_name('pass').send_keys(password)
-    driver.find_element_by_xpath('//*[@id="loginbutton"]').click()
-    driver.get(url)
-    time.sleep(5)
-    driver.execute_script("window.scrollTo(0,2500)") # 나중에 숫자 말고 화면 높이로 변경 ㄱ
-    time.sleep(5)
-    driver.execute_script("window.scrollTo(0,2500)")
-    time.sleep(5)
-    driver.execute_script("window.scrollTo(0,2500)")
-    time.sleep(5)
-
-    html = driver.page_source
-    soup = BeautifulSoup(html, 'html.parser')
-
-    all = soup.find_all('div', {'class': '_1dwg _1w_m _q7o'})
-
-    for feed in all:
-        contents = feed.find_all('', {'class': '_5pbx userContent'})
-
-        if not contents:  # contents = []
-            pass
-        else:
-            content = contents[0]
-            print(content.p)
-
-        imageurl_list = []
-
-        imagediv = feed.find_all('a', {'class': '_5dec _xcx'})
-
-        for image in imagediv:
-            imageurl = image['data-ploi']
-            imageurl_list.append(imageurl)
-        print(imageurl_list)
-
-    articles = []
-    return articles
-
-
-
-# 버려야 할 듯..? ㅠㅠ
 from app import fbconfig, mongo
 from app.model.article import Facebook
 import requests
 
-app_id = " "
-app_secret = " "
 # access_token = app_id + "|" + app_secret
-limit = 5
+limit = 20
 access_token = fbconfig.access_token
-
 
 def request_data_to_facebook(url):
     custom_headers = {
@@ -64,11 +12,6 @@ def request_data_to_facebook(url):
     }
     req = requests.get(url, headers=custom_headers)
     return req.json()
-
-
-def create_url(base, node, parameters):
-    url = base + node + parameters
-    return url
 
 
 def get_facebook_page_feed_url(page, token):
@@ -95,23 +38,87 @@ def get_facebook_page_feed_data(page_id):
         datalist = resp_data['feed']    # json x dictionary o
         for data in datalist['data']:
             try:
-                data['page_id'] = page_id  # pageid는 직접 지정
-                _data = Facebook(**data)  # kwargs 형태로 전달
+                _data = create_json_from_crawled_data(data, page_id)
                 # print(_data.to_json())
-                _crawledData.append(_data.to_dict())
+                _crawledData.append(_data)
                 i = i + 1
             except Exception as e:
-                print(e)
+                print('\n get_facebook_page_feed_data error() in for :::: ', e)
 
     except Exception as e:
         # 토큰이 만료된 경우 에러 (만료 되었다는 걸 아는 순간은 request를 받고난 뒤..!)
         # response에 feed가 없는 경우
-        print(e)
+        print('\n get_facebook_page_feed_data error() :::: ' + e)
     
     # insert_to_database(_crawledData) # DB insert 테스트 완료
     print("count of Data : %d" % i)
 
     return _crawledData
+
+
+def get_feed_images_url(content_id):
+    base = "https://graph.facebook.com/v2.11"
+    feed_id = "/" + content_id
+    fields = "/?fields=attachments"
+    token = "&access_token=%s" % access_token
+    url = base + feed_id + fields + token
+    return url
+
+
+def get_feed_image_data_list(content_id):
+    image_list = []
+    url = get_feed_images_url(content_id)
+    resp_data = request_data_to_facebook(url)
+
+    # subattachment 있는 경우 -> 사진 여러개
+    # subattachment 없고, media가 있는 경우 -> 사진 한 개
+    # subattachment도 없고, media도 없는 경우 -> 사진 없음
+    try:
+        if 'attachments' in resp_data:
+            data = resp_data['attachments']['data'][0]
+
+            if 'subattachments' in data:
+                # print('\n multiple images')
+                media_list = data['subattachments']['data']
+
+                for media in media_list:
+                    image = media['media']['image']
+                    src = image['src']
+                    image_list.append(src)
+
+            elif 'media' in data:
+                # print('\n single images')
+                image = data['media']['image']
+                src = image['src']
+                image_list.append(src)
+
+        else:
+            # print('\n image is none')
+            pass
+
+    except Exception as e:
+        # 토큰이 만료된 경우 에러 (만료 되었다는 걸 아는 순간은 request를 받고난 뒤..!)
+        # response에 feed가 없는 경우
+        print('\n get_feed_image_data_list() error :::: ', e)
+    return image_list
+
+
+def create_json_from_crawled_data(article=None, page_id=''):
+    # article이 none일 경우 처리
+
+    _article = {}
+    _article['community'] = 'facebook'+'/'+ page_id
+    _article['boardAddr'] = article['id']
+    _article['author'] = page_id
+    _article['content'] = article['message']
+    _article['createdDate'] = article['created_time']
+    _article['title'] = ''  # 제목 공란
+
+    # 첨부 이미지
+    image_list = get_feed_image_data_list(article['id'])
+    _article['images'] = image_list
+
+    return _article
 
 
 # 데이터 리스트 insert
