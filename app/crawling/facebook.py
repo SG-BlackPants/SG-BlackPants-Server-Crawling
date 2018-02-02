@@ -1,9 +1,8 @@
 from app import fbconfig, mongo
-from app.model.article import Facebook
 import requests
 
 # access_token = app_id + "|" + app_secret
-limit = 20
+limit = 10
 access_token = fbconfig.access_token
 
 def request_data_to_facebook(url):
@@ -19,6 +18,15 @@ def get_facebook_page_feed_url(page, token):
     base = "https://graph.facebook.com/v2.11"
     fields = "/?fields=feed.limit(%d){created_time,id,message,shares,full_picture}" % limit
     url = base + page + fields + token
+    return url
+
+
+def get_feed_images_url(content_id):
+    base = "https://graph.facebook.com/v2.11"
+    feed_id = "/" + content_id
+    fields = "/?fields=attachments"
+    token = "&access_token=%s" % access_token
+    url = base + feed_id + fields + token
     return url
 
 
@@ -50,19 +58,10 @@ def get_facebook_page_feed_data(page_id):
         # response에 feed가 없는 경우
         print('\n get_facebook_page_feed_data error() :::: ' + e)
     
-    # insert_to_database(_crawledData) # DB insert 테스트 완료
+    insert_to_database(_crawledData)  # DB insert 테스트 완료
     print("count of Data : %d" % i)
 
     return _crawledData
-
-
-def get_feed_images_url(content_id):
-    base = "https://graph.facebook.com/v2.11"
-    feed_id = "/" + content_id
-    fields = "/?fields=attachments"
-    token = "&access_token=%s" % access_token
-    url = base + feed_id + fields + token
-    return url
 
 
 def get_feed_image_data_list(content_id):
@@ -123,7 +122,7 @@ def create_json_from_crawled_data(article=None, page_id=''):
 
 # 데이터 리스트 insert
 def insert_to_database(datalist):
-    print(datalist)
+    # print(datalist)
     collection = mongo.db.Article
     # insert!
     try:

@@ -1,3 +1,4 @@
+from app import mongo
 from bs4 import BeautifulSoup
 from selenium import webdriver
 import time
@@ -44,6 +45,7 @@ def get_everytime_all_data(userid, password, boardnum, start_page, end_page):
 
             articles.append(_article)
 
+    insert_to_database(articles)
     print('총 %d 개의 데이터 전달' % all_num)
     return articles
 
@@ -96,3 +98,16 @@ def create_json_from_crawled_data(article=None):
     _article['images'] = image_list
 
     return _article
+
+
+# 데이터 리스트 insert
+def insert_to_database(datalist):
+    print(datalist)
+    collection = mongo.db.Article
+    # insert!
+    try:
+        collection.insert(datalist)
+    except Exception as e:
+        print(e)
+    else:
+        print('data insert success!')

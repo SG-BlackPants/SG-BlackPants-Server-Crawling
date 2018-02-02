@@ -32,25 +32,7 @@ def crawling_from_facebook(univ_name, number):
     else:
         page_id = community_list[univ_name][_number]['id']
         crawled_data = facebook.get_facebook_page_feed_data(page_id)
-        return jsonify({'result': crawled_data})
-
-
-@mod.route('/facebook/<univ_name>/<number>', methods=['POST'])
-def crawling_from_facebook_by_selenium(univ_name, number):
-    print('called crawling from facebook by selenium')
-    email = request.json['email']
-    password = request.json['pw']
-
-    _number = int(number)
-
-    if (_number < 0 or
-            _number >= len(community_list[univ_name])):
-        print('number에 문제가 있군요')
-        return jsonify({'result': "잘못된 요청 또는 URL을 전달하였습니다"})
-    else:
-        url = community_list[univ_name][_number]['url']
-        result = facebook.get_facebook_page_all_data(email, password, url)
-        return jsonify({'result': result})
+        return jsonify({'result': 'success'})
 
 
 @mod.route('/everytime/<board_num>/<start_page>/<end_page>', methods=['POST'])
