@@ -66,18 +66,17 @@ def get_facebook_page_feed_data(page_id, univ_name):
         data_list = resp_data['feed']    # Dict
         for data in data_list['data']:
             try:
-                print(data)
                 created_time = set_date_format_to_datetime(data['created_time'])
 
                 # 만약에 data 가 lately_date 보다 빠르다면? : 새롭게 저장할 데이터
-                #if compare_date_with_lately_date(lately_date, created_time) is True:
-                _data = create_json_from_crawled_data(data, page_id, univ_name)
-                _crawledData.append(_data)
-                i = i + 1
+                if compare_date_with_lately_date(lately_date, created_time) is True:
+                    _data = create_json_from_crawled_data(data, page_id, univ_name)
+                    _crawledData.append(_data)
+                    i = i + 1
 
                 # 만약에 date 가 lately_date 보다 느리다면? : 이미 이전에 크롤링 한 데이터임
-                # else:
-                #    pass
+                else:
+                    pass
 
             except Exception as e:
                 print('\n get_facebook_page_feed_data error() in for :::: ', e)
@@ -97,6 +96,7 @@ def get_facebook_page_feed_data(page_id, univ_name):
 
 
 def set_date_format_to_datetime(create_date=None):
+    print(create_date)
     if create_date is None:
         return None
 
@@ -161,18 +161,19 @@ def get_facebook_page_info_data(page_id):
     return data
 
 
-
 def create_json_from_crawled_data(article=None, page_id='', univ_name=''):
     # article이 none일 경우 처리
 
     if article is None:
         pass
 
+    community_name = get_facebook_page_info_data(page_id)
+
     _article = {}
-    _article['community'] = 'facebook'+'/'+ page_id
+    _article['community'] = 'facebook'+'/'+ community_name
     _article['boardAddr'] = article['id']
     _article['university'] = univ_name
-    _article['author'] = get_facebook_page_info_data(page_id)
+    _article['author'] = community_name
     _article['content'] = article['message']
     _article['createdDate'] = set_date_format_to_datetime(article['created_time'])
     _article['title'] = ''  # 제목 공란
@@ -186,4 +187,4 @@ def create_json_from_crawled_data(article=None, page_id='', univ_name=''):
 
 def compare_date_with_lately_date(standard_date, compare_date):
     # 새로운 데이터일 경우, True, 새로운 데이터가 아닐 경우 False
-    True if standard_date < compare_date else False
+    return True if standard_date < compare_date else False

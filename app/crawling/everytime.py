@@ -1,78 +1,100 @@
-# -*- coding: utf-8 -*-
-from app import mongo
+import time
+import config
 from bs4 import BeautifulSoup
 from selenium import webdriver
-import time
+from dateutil import parser
+from app.model.article import Article
+# from datetime import datetime
+import pytz
 
 # 나중에는 크롬으로 볼 필요가 없으니, PhantomJS로 변경할 것
-# driver = webdriver.PhantomJS('C:/Users/user/Desktop/phantomjs-2.1.1-windows/phantomjs-2.1.1-windows/bin/phantomjs')
-# driver = webdriver.Chrome('C:/Users/user/Desktop/chromedriver/chromedriver')
+# driver = webdriver.PhantomJS('./phantomjs')
+# driver = webdriver.Chrome('./chromedriver')
 
 
-def get_everytime_all_data(userid, password, boardnum, start_page, end_page):
-    driver = webdriver.Chrome('C:/Users/user/Desktop/chromedriver/chromedriver')
+def get_everytime_all_data(userid, password, univ_name):
+    driver = webdriver.Chrome(config.Chrome_driver_path)
     login_in_everytime(userid, password, driver)
 
-    articles = []
-
-    start_page = int(start_page)
-    end_page = int(end_page)
+    # TODO : 이렇게 안하게 수정
+    start_page = 1
+    end_page = 1
 
     if start_page < 1:
         start_page = 1
 
-    all_num = 0
+    num = 0  # insert 데이터 갯수 측정
+    a = Article()
+    lately_date = a.get_community_lately_data(univ_name, 'everytime')
 
-    get_board_url(driver)
+    url_list = get_board_urls(driver, 'http://khu.everytime.kr')
 
-    # for i in range(start_page, end_page + 1):
-    #     board_url = 'http://everytime.kr/'+boardnum+'/p'+'/' + str(i)
-    #     driver.get(board_url)
-    #
-    #     url_list = get_page_url_list(driver)
-    #
-    #     for url in url_list:
-    #         all_num = all_num + 1
-    #         driver.get(url)
-    #
-    #         time.sleep(1)
-    #
-    #         html = driver.page_source
-    #         soup = BeautifulSoup(html, 'html.parser')
-    #
-    #         article = soup.select('div.wrap.articles > article > a')[0]
-    #         _article = create_json_from_crawled_data(article)
-    #         _article['boardAddr'] = url[19:]
-    #
-    #         articles.append(_article)
-    #
-    # # insert_to_database(articles)
-    # print('총 %d 개의 데이터 전달' % all_num)
-    return articles
+    for url in url_list:
+        for i in range(start_page, end_page + 1):
+            url = url + '/p/' + str(i)
+            driver.get(url)
+
+            # 해당 게시판 내 페이지(board_url)에 있는 게시글 url을 모두 가져옴
+            article_url_list = get_page_url_list(driver)
+
+            # url 의 갯수 (20개) 만큼 for 문을 돌린다.
+            for article_url in article_url_list:
+                driver.get(article_url)
+                time.sleep(3)
+
+                html = driver.page_source
+                soup = BeautifulSoup(html, 'html.parser')
+
+                try:
+                    article = soup.select('div.wrap.articles > article > a')[0]
+
+                    # 해당 게시글의 날짜 및 시간을 가져옴
+                    article_time = set_date_format_to_datetime(article.time['title'])
+
+                    # 해당 게시글의 날짜 및 시간이 기존 데이터보다 이후인 경우 수행한다.
+                    if compare_date_with_lately_date(lately_date, article_time) is True:
+
+                        # 데이터 구조화
+                        _data = create_json_from_crawled_data(article)
+                        _data['university'] = univ_name
+                        _data['boardAddr'] = article_url[19:]
+
+                        a.insert_to_database(_data)
+                        num = num + 1  # insert 의 개수 + 1
+
+                    # 해당 게시글의 날짜 및 시간이 기존 데이터보다 이전인 경우
+                    # 더이상 크롤링을 수행하지 않아도 되기 때문에 for 문을 빠져나간다.
+                    else:
+                        break
+
+                except Exception as e:
+                    print('get_everytime_all_data() in for :::: ', e)
+
+    print('총 %d 개의 데이터 전달' % num)
+    return 'end'
 
 
-def get_board_url(driver):
-    url = 'http://khu.everytime.kr'
+def get_board_urls(driver, url):
     driver.get(url)
-
-    time.sleep(1)
+    time.sleep(3)
 
     html = driver.page_source
     soup = BeautifulSoup(html, 'html.parser')
 
     group = soup.findAll('div', {'class': 'group'})
+    board_url = list()
 
     for i in range(0, 2):  # for(int i=0; i<2; i++)
         li = group[i].findAll('a', {'class': 'new'})
-        board_url = []
-        for ul in li:
-            url = ul['href']
+        for a in li:
+            url = 'http://everytime.kr' + a['href']
             board_url.append(url)
 
-    print(board_url)
+    return board_url
+
 
 def login_in_everytime(userid, password, driver):
-    driver.get('https://khu.everytime.kr/login')
+    driver.get('https://everytime.kr/login')
     driver.find_element_by_name('userid').send_keys(userid)
     driver.find_element_by_name('password').send_keys(password)
     driver.find_element_by_xpath('//*[@id="container"]/form/p[3]/input').click()
@@ -82,14 +104,14 @@ def get_page_url_list(driver):
 
     time.sleep(1)
 
-    url_list = []
+    url_list = list()
 
     html = driver.page_source
     soup = BeautifulSoup(html, 'html.parser')
 
-    all = soup.select('div.wrap.articles > article')
+    alldata = soup.select('div.wrap.articles > article')
 
-    for article in all:
+    for article in alldata:
         url = 'http://everytime.kr'+article.a['href']
         url_list.append(url)
 
@@ -99,17 +121,17 @@ def get_page_url_list(driver):
 def create_json_from_crawled_data(article=None):
     # article이 none일 경우 처리
 
-    _article = {}
+    _article = dict()
     _article['community'] = 'everytime'
     _article['author'] = article.h3.text  # 작성자
     _article['content'] = article.p.text  # 내용
-    _article['createdDate'] = article.time['title']  # 작성시간
+    _article['createdDate'] = set_date_format_to_datetime(article.time['title'])  # 작성시간
 
     # 제목이 있는 게시판과 없는 게시판이 있으므로 처리
     try:
        _article['title'] = article.h2.text  # 제목
     except Exception as e:
-        _article['title'] = ''  # 제목 공란
+        _article['title'] = ''  # 제목을 공란으로 처리
 
     # 첨부 이미지
     image_list = []
@@ -121,14 +143,24 @@ def create_json_from_crawled_data(article=None):
     return _article
 
 
-# 데이터 리스트 insert
-def insert_to_database(datalist):
-    # print(datalist)
-    collection = mongo.db.article
-    # insert!
-    try:
-        collection.insert(datalist)
-    except Exception as e:
-        print(e)
+def set_date_format_to_datetime(create_date=None):
+    if create_date is None:
+        return None
+
     else:
-        print('data insert success!')
+        try:
+            date = parser.parse(create_date, pytz.UTC)
+            return date
+
+        except Exception as e:
+            print('\n set_date_format_to_datetime() :::: ' + e)
+            return None
+
+
+# standard_date : 기준 날짜 (lately_date)
+# compare_date  : 비교 날짜
+# TODO : 삼항연산자로 변경
+def compare_date_with_lately_date(standard_date, compare_date):
+    # 새로운 데이터일 경우, True, 새로운 데이터가 아닐 경우 False
+    rv = True if standard_date <= compare_date else False
+    return rv

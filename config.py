@@ -1,2 +1,2 @@
 MONGO_DBNAME = 'univscanner'
-Chrome_driver_path = 'C:/Users/user/Desktop/chromedriver/chromedriver'
+Chrome_driver_path = './chromedriver'

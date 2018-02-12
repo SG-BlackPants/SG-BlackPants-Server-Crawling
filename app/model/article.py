@@ -45,9 +45,7 @@ class Article:
 
         else:
 
-            datetime_str = '2018-01-01 00:00:00'
-            date = datetime.datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
-            type(date)
+            date = None
 
             # facebook 의 경우, facebook/{커뮤니티 아이디} 로 학교에 해당하는 커뮤니티 구분
             # everytime 의 경우, everytime 하나로 고정
@@ -73,8 +71,8 @@ class Article:
             if date is None:
                 datetime_str = '2018-01-01 00:00:00'
                 date = datetime.datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
-                type(date)
 
+            print('lately_date timeZone :: ', date.tzinfo)
             return date
 
     # 데이터 리스트 insert
