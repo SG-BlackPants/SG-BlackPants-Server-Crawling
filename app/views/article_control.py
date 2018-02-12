@@ -31,8 +31,8 @@ def crawling_from_facebook(univ_name, number):
         return jsonify({'result': "잘못된 요청 또는 URL을 전달하였습니다"})   # 500에러도 보내야할까?
     else:
         page_id = community_list[univ_name][_number]['id']
-        crawled_data = facebook.get_facebook_page_feed_data(page_id)
-        return jsonify({'result': 'success'})
+        result = facebook.get_facebook_page_feed_data(page_id, univ_name)
+        return jsonify({'result': result})  # 이 부분을 나중에 변경 -> API-Server로 보내기
 
 
 @mod.route('/everytime/<board_num>/<start_page>/<end_page>', methods=['POST'])

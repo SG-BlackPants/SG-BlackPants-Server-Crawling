@@ -22,33 +22,53 @@ def get_everytime_all_data(userid, password, boardnum, start_page, end_page):
 
     all_num = 0
 
-    for i in range(start_page, end_page + 1):
-        board_url = 'http://everytime.kr/'+boardnum+'/p'+'/' + str(i)
-        driver.get(board_url)
+    get_board_url(driver)
 
-        url_list = get_page_url_list(driver)
-
-        for url in url_list:
-            all_num = all_num + 1
-            driver.get(url)
-
-            time.sleep(1)
-
-            html = driver.page_source
-            soup = BeautifulSoup(html, 'html.parser')
-
-            article = soup.select('div.wrap.articles > article > a')[0]
-            _article = create_json_from_crawled_data(article)
-            _article['boardAddr'] = url[19:]
-
-            # 데이터 중복 체크 -> 돌리는 순간 추가되면 어쩌지?
-
-            articles.append(_article)
-
-    insert_to_database(articles)
-    print('총 %d 개의 데이터 전달' % all_num)
+    # for i in range(start_page, end_page + 1):
+    #     board_url = 'http://everytime.kr/'+boardnum+'/p'+'/' + str(i)
+    #     driver.get(board_url)
+    #
+    #     url_list = get_page_url_list(driver)
+    #
+    #     for url in url_list:
+    #         all_num = all_num + 1
+    #         driver.get(url)
+    #
+    #         time.sleep(1)
+    #
+    #         html = driver.page_source
+    #         soup = BeautifulSoup(html, 'html.parser')
+    #
+    #         article = soup.select('div.wrap.articles > article > a')[0]
+    #         _article = create_json_from_crawled_data(article)
+    #         _article['boardAddr'] = url[19:]
+    #
+    #         articles.append(_article)
+    #
+    # # insert_to_database(articles)
+    # print('총 %d 개의 데이터 전달' % all_num)
     return articles
 
+
+def get_board_url(driver):
+    url = 'http://khu.everytime.kr'
+    driver.get(url)
+
+    time.sleep(1)
+
+    html = driver.page_source
+    soup = BeautifulSoup(html, 'html.parser')
+
+    group = soup.findAll('div', {'class': 'group'})
+
+    for i in range(0, 2):  # for(int i=0; i<2; i++)
+        li = group[i].findAll('a', {'class': 'new'})
+        board_url = []
+        for ul in li:
+            url = ul['href']
+            board_url.append(url)
+
+    print(board_url)
 
 def login_in_everytime(userid, password, driver):
     driver.get('https://khu.everytime.kr/login')
@@ -102,8 +122,8 @@ def create_json_from_crawled_data(article=None):
 
 # 데이터 리스트 insert
 def insert_to_database(datalist):
-    print(datalist)
-    collection = mongo.db.Article
+    # print(datalist)
+    collection = mongo.db.article
     # insert!
     try:
         collection.insert(datalist)
