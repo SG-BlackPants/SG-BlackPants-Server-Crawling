@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from app import fbconfig
 from dateutil import parser
 from app.model.article import Article

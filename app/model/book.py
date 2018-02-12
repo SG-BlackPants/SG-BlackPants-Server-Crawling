@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # 이건 그냥 테스트용
 class Book:
     name = ""

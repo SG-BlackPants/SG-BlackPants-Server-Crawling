@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from app import mongo
 from bs4 import BeautifulSoup
 from selenium import webdriver

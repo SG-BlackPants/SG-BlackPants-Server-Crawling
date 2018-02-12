@@ -63,7 +63,7 @@ def test1():
     print(soup.find('', {'id':'link1'}))        # <a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>
 
     print('#### find by class ####')
-    print(soup.find_all(class_='sister'))       # _붙여야 클래스와 구분되나 봄
+    print(soup.find_all(class_='sister'))
     print(soup.find_all('', {'class':'sister'}))    # [
                                                     # <a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>,
                                                     # <a class="sister" href="http://example.com/lacie" id="link2">Lacie</a>,
