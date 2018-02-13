@@ -35,9 +35,9 @@ def crawling_from_facebook(univ_name, number):
         return jsonify({'result': result})  # 이 부분을 나중에 변경 -> API-Server로 보내기
 
 
-@mod.route('/everytime/<board_num>/<start_page>/<end_page>', methods=['POST'])
-def crawling_from_everytime(board_num, start_page, end_page):
+@mod.route('/everytime/<univ_name>', methods=['POST'])
+def crawling_from_everytime(univ_name):
     id = request.json['id']
     pw = request.json['pw']
-    result = everytime.get_everytime_all_data(id, pw, board_num, start_page, end_page)
-    return jsonify({'result': result})
+    result = everytime.get_everytime_all_data(id, pw, univ_name)
+    return jsonify({'result': 'end'})

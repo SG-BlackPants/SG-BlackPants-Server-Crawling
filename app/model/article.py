@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from app import mongo
 import datetime
+import pytz
 
 """
     _id             : ObjectID
@@ -72,7 +73,9 @@ class Article:
                 datetime_str = '2018-01-01 00:00:00'
                 date = datetime.datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
 
-            print('lately_date timeZone :: ', date.tzinfo)
+            date = date.replace(tzinfo=pytz.UTC)
+            print('lately_date timeZone :: \n', date.tzinfo)
+            print('lately_date :: ', date)
             return date
 
     # 데이터 리스트 insert
