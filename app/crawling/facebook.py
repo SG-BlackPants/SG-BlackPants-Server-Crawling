@@ -3,9 +3,11 @@ from app import fbconfig
 from dateutil import parser
 from app.model.article import Article
 import requests
+import datetime
+import pytz
 
 # access_token = app_id + "|" + app_secret
-limit = 300
+limit = 100
 access_token = fbconfig.access_token
 
 
@@ -24,7 +26,6 @@ def get_facebook_page_info_url(page_id):
     token = "&access_token=%s" % access_token
     url = base + node_id + fields + token
     return url
-
 
 
 def get_facebook_page_feed_url(page, token):
@@ -52,11 +53,12 @@ def get_facebook_page_feed_data(page_id, univ_name):
     url = get_facebook_page_feed_url(page, token)
 
     resp_data = request_data_to_facebook(url)
+    community_name = get_facebook_page_info_data(page_id)
 
     # 비교 객체 생성
     article = Article()
 
-    lately_date = article.get_community_lately_data(univ_name, 'facebook', page_id)
+    lately_date = article.get_community_lately_data(univ_name, 'facebook', community_name)
 
     i = 0
     _crawledData = []
@@ -70,7 +72,7 @@ def get_facebook_page_feed_data(page_id, univ_name):
 
                 # 만약에 data 가 lately_date 보다 빠르다면? : 새롭게 저장할 데이터
                 if compare_date_with_lately_date(lately_date, created_time) is True:
-                    _data = create_json_from_crawled_data(data, page_id, univ_name)
+                    _data = create_json_from_crawled_data(data, community_name, univ_name, created_time)
                     _crawledData.append(_data)
                     i = i + 1
 
@@ -96,13 +98,16 @@ def get_facebook_page_feed_data(page_id, univ_name):
 
 
 def set_date_format_to_datetime(create_date=None):
-    print(create_date)
     if create_date is None:
         return None
 
     else:
         try:
             date = parser.parse(create_date)
+            # date = datetime.datetime.strptime(create_date, '%Y-%m-%d %H:%M:%S')
+            date = date.replace(tzinfo=pytz.UTC)
+            print(date)
+            print(date.tzinfo)
             return date
 
         except Exception as e:
@@ -161,21 +166,19 @@ def get_facebook_page_info_data(page_id):
     return data
 
 
-def create_json_from_crawled_data(article=None, page_id='', univ_name=''):
+def create_json_from_crawled_data(article=None, community_name='', univ_name='', created_time=''):
     # article이 none일 경우 처리
 
     if article is None:
         pass
 
-    community_name = get_facebook_page_info_data(page_id)
-
     _article = {}
-    _article['community'] = 'facebook'+'/'+ community_name
+    _article['community'] = 'facebook'+'/' + community_name
     _article['boardAddr'] = article['id']
     _article['university'] = univ_name
     _article['author'] = community_name
     _article['content'] = article['message']
-    _article['createdDate'] = set_date_format_to_datetime(article['created_time'])
+    _article['createdDate'] = created_time
     _article['title'] = ''  # 제목 공란
 
     # 첨부 이미지
@@ -186,5 +189,6 @@ def create_json_from_crawled_data(article=None, page_id='', univ_name=''):
 
 
 def compare_date_with_lately_date(standard_date, compare_date):
-    # 새로운 데이터일 경우, True, 새로운 데이터가 아닐 경우 False
-    return True if standard_date < compare_date else False
+    rv = True if standard_date < compare_date else False
+    print('return value ::: ', rv)
+    return rv

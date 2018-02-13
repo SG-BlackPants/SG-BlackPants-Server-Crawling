@@ -6,6 +6,7 @@ from dateutil import parser
 from app.model.article import Article
 # from datetime import datetime
 import pytz
+import datetime
 
 # 나중에는 크롬으로 볼 필요가 없으니, PhantomJS로 변경할 것
 # driver = webdriver.PhantomJS('./phantomjs')
@@ -13,7 +14,7 @@ import pytz
 
 
 def get_everytime_all_data(userid, password, univ_name):
-    driver = webdriver.Chrome(config.Chrome_driver_path)
+    driver = webdriver.PhantomJS(config.Chrome_driver_path)
     login_in_everytime(userid, password, driver)
 
     # TODO : 이렇게 안하게 수정
@@ -55,7 +56,7 @@ def get_everytime_all_data(userid, password, univ_name):
                     if compare_date_with_lately_date(lately_date, article_time) is True:
 
                         # 데이터 구조화
-                        _data = create_json_from_crawled_data(article)
+                        _data = create_json_from_crawled_data(article, article_time)
                         _data['university'] = univ_name
                         _data['boardAddr'] = article_url[19:]
 
@@ -118,14 +119,14 @@ def get_page_url_list(driver):
     return url_list
 
 
-def create_json_from_crawled_data(article=None):
+def create_json_from_crawled_data(article=None, article_time=''):
     # article이 none일 경우 처리
 
     _article = dict()
     _article['community'] = 'everytime'
     _article['author'] = article.h3.text  # 작성자
     _article['content'] = article.p.text  # 내용
-    _article['createdDate'] = set_date_format_to_datetime(article.time['title'])  # 작성시간
+    _article['createdDate'] = article_time  # 작성시간
 
     # 제목이 있는 게시판과 없는 게시판이 있으므로 처리
     try:
@@ -149,7 +150,8 @@ def set_date_format_to_datetime(create_date=None):
 
     else:
         try:
-            date = parser.parse(create_date, pytz.UTC)
+            date = datetime.datetime.strptime(create_date, '%Y-%m-%d %H:%M:%S')
+            date = date.replace(tzinfo=pytz.UTC)
             return date
 
         except Exception as e:
@@ -162,5 +164,5 @@ def set_date_format_to_datetime(create_date=None):
 # TODO : 삼항연산자로 변경
 def compare_date_with_lately_date(standard_date, compare_date):
     # 새로운 데이터일 경우, True, 새로운 데이터가 아닐 경우 False
-    rv = True if standard_date <= compare_date else False
+    rv = True if standard_date < compare_date else False
     return rv
