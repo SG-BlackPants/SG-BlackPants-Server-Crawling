@@ -5,7 +5,7 @@ from app.model.article import Article
 import requests
 
 # access_token = app_id + "|" + app_secret
-limit = 10
+limit = 300
 access_token = fbconfig.access_token
 
 
