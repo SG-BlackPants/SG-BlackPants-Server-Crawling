@@ -51,9 +51,11 @@ class Article:
             # facebook 의 경우, facebook/{커뮤니티 아이디} 로 학교에 해당하는 커뮤니티 구분
             # everytime 의 경우, everytime 하나로 고정
             if community is 'facebook':
-                community_id = '/' + page_id
+                community_id = '-' + page_id
             elif community is 'everytime':
                 community_id = ''
+
+            print(community_id)
 
             try:
                 cursor = self.collection \

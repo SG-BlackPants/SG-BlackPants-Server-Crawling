@@ -1,7 +1,8 @@
 # -- coding: utf-8 --
 from flask import Blueprint, Response, jsonify, request
 from app.crawling import beautifulsoup_test, facebook, everytime
-from app.fbconfig import community_list
+from app.fbconfig import univ_list
+import requests
 
 mod = Blueprint('article', __name__, url_prefix='/article')
 
@@ -11,33 +12,46 @@ def article_index():
     return 'article Index'
 
 
-@mod.route('/test', methods=['GET'])
-def crawling_test():
-    beautifulsoup_test.test1()
-    return Response(status=200)
+@mod.route('/req', methods={'GET'})
+def requesttest():
+    url = 'http://ec2-52-23-164-26.compute-1.amazonaws.com:3000/users'
+    custom_headers = {
+        'Content-Type': 'application/json;charset=UTF-8'
+    }
+    req = requests.get(url, headers=custom_headers)
+    print(req.text)
+    return 'success'
 
 
 # GraphAPI 사용 크롤링
-@mod.route('/facebook/<univ_name>/<number>', methods=['GET'])
-def crawling_from_facebook(univ_name, number):
+@mod.route('/facebook/<limit>', methods=['GET'])
+def crawling_from_facebook(limit):
     print('called crawling_from_facebook()')
+    univ_length = len(univ_list)
 
-    # 페이지 번호가 잘못 들어올 경우가 있을까?
-    _number = int(number)
+    for univ_num in range(0, univ_length):
+        community_list = univ_list[univ_num]['communityList']
+        univ_name = univ_list[univ_num]['schoolName']
 
-    if(_number < 0 or
-            _number >= len(community_list[univ_name])):
-        print('number에 문제가 있군요')
-        return jsonify({'result': "잘못된 요청 또는 URL을 전달하였습니다"})   # 500에러도 보내야할까?
-    else:
-        page_id = community_list[univ_name][_number]['id']
-        result = facebook.get_facebook_page_feed_data(page_id, univ_name)
-        return jsonify({'result': result})  # 이 부분을 나중에 변경 -> API-Server로 보내기
+        # Facebook Crawling
+        for community_num in range(0, len(community_list)):
+            page_id = community_list[community_num]
+            result = facebook.get_facebook_page_feed_data(page_id, univ_name, limit)
+            print(':::: Facebook crawling in %s success !!! ::::' % page_id)
+
+    return jsonify({'result': 'success'})  # 이 부분을 나중에 변경 -> API-Server로 보내기
 
 
-@mod.route('/everytime/<univ_name>', methods=['POST'])
-def crawling_from_everytime(univ_name):
-    id = request.json['id']
-    pw = request.json['pw']
-    result = everytime.get_everytime_all_data(id, pw, univ_name)
+@mod.route('/everytime', methods=['GET'])
+def crawling_from_everytime():
+    univ_length = len(univ_list)
+
+    for univ_num in range(0, univ_length):
+        univ_name = univ_list[univ_num]['schoolName']
+
+        url = univ_list[univ_num]['everytimeUrl']
+        id = univ_list[univ_num]['user']['id']
+        pw = univ_list[univ_num]['user']['pw']
+        result = everytime.get_everytime_all_data(id, pw, url, univ_name)
+
     return jsonify({'result': 'end'})

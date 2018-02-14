@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import time
 import config
 from bs4 import BeautifulSoup
@@ -13,7 +14,7 @@ import datetime
 # driver = webdriver.Chrome('./chromedriver')
 
 
-def get_everytime_all_data(userid, password, univ_name):
+def get_everytime_all_data(userid, password, everytime_url, univ_name):
     driver = webdriver.PhantomJS(config.Chrome_driver_path)
     login_in_everytime(userid, password, driver)
 
@@ -28,7 +29,7 @@ def get_everytime_all_data(userid, password, univ_name):
     a = Article()
     lately_date = a.get_community_lately_data(univ_name, 'everytime')
 
-    url_list = get_board_urls(driver, 'http://khu.everytime.kr')
+    url_list = get_board_urls(driver, everytime_url)
 
     for url in url_list:
         for i in range(start_page, end_page + 1):
@@ -41,7 +42,7 @@ def get_everytime_all_data(userid, password, univ_name):
             # url 의 갯수 (20개) 만큼 for 문을 돌린다.
             for article_url in article_url_list:
                 driver.get(article_url)
-                time.sleep(3)
+                time.sleep(1)
 
                 html = driver.page_source
                 soup = BeautifulSoup(html, 'html.parser')
