@@ -20,8 +20,8 @@ app.config.update(
     CELERYBEAT_SCHEDULE={
         'facebook_crawling': {
             'task': 'app.task.facebook_crawling',
-            # 'schedule': crontab(hour='*', minute='5'),
-            'schedule': timedelta(seconds=180),
+            'schedule': crontab(hour='*', minute='*'),
+            # 'schedule': timedelta(seconds=180),
             'args': ()
         }
     }

@@ -25,7 +25,7 @@ def facebook_crawling():
         # Facebook Crawling
         for community_num in range(0, len(community_list)):
             page_id = community_list[community_num]
-            result = facebook.get_facebook_page_feed_data(page_id, univ_name)
+            result = facebook.get_facebook_page_feed_data(page_id, univ_name, 10)
             print(':::: Facebook crawling in %s !!! ::::' % page_id)
         
         # everytime Crawling
