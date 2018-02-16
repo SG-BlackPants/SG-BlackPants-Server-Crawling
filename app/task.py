@@ -22,10 +22,13 @@ def facebook_crawling():
         community_list = univ_list[univ_num]['communityList']
         univ_name = univ_list[univ_num]['schoolName']
 
+        timelist = list()
+
         # Facebook Crawling
         for community_num in range(0, len(community_list)):
             page_id = community_list[community_num]
             result = facebook.get_facebook_page_feed_data(page_id, univ_name, 10)
+            timelist.append(result)
             print(':::: Facebook crawling in %s !!! ::::' % page_id)
         
         # everytime Crawling
@@ -33,12 +36,24 @@ def facebook_crawling():
         id = univ_list[univ_num]['user']['id']
         pw = univ_list[univ_num]['user']['pw']
         result = everytime.get_everytime_all_data(id, pw, url, univ_name)
+        timelist.append(result)
         print(result)
 
+        old_date = get_old_date(timelist)
         # send post data to api server : data insert success
-        send_post_to_api_server(univ_name, "2018-01-28T10:05:26+0000")
+        send_post_to_api_server(univ_name, old_date)
 
     print(':::: facebook_crawling end!!! ::::')
+
+
+def get_old_date(timelist=None):
+    if timelist is None:
+        pass
+    else:
+        timelist.sort()
+        for i in range(0, int(len(timelist))):
+            print(timelist[i])
+        return timelist[0]
 
 
 def send_post_to_api_server(univ_name, create_date):
@@ -50,4 +65,3 @@ def send_post_to_api_server(univ_name, create_date):
     }
     resp = requests.post(url, data=param)
     print(resp.text)
-
