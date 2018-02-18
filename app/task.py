@@ -37,7 +37,6 @@ def facebook_crawling():
         pw = univ_list[univ_num]['user']['pw']
         result = everytime.get_everytime_all_data(id, pw, url, univ_name)
         timelist.append(result)
-        print(result)
 
         old_date = get_old_date(timelist)
         # send post data to api server : data insert success

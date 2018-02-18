@@ -3,9 +3,7 @@ import time
 import config
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from dateutil import parser
 from app.model.article import Article
-# from datetime import datetime
 import pytz
 import datetime
 
@@ -72,8 +70,8 @@ def get_everytime_all_data(userid, password, everytime_url, univ_name):
                 except Exception as e:
                     print('get_everytime_all_data() in for :::: ', e)
 
-    print('총 %d 개의 데이터 전달' % num)
-    return 'end'
+    # print('총 %d 개의 데이터 전달' % num)
+    return lately_date
 
 
 def get_board_urls(driver, url):

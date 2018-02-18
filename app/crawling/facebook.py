@@ -94,7 +94,7 @@ def get_facebook_page_feed_data(page_id, univ_name, limit):
     # 데이터 갯수 Check
     print("count of Data : %d" % i)
 
-    return 'success'
+    return lately_date
 
 
 def set_date_format_to_datetime(create_date=None):
