@@ -1,6 +1,5 @@
 import os
 from app import celery
-from pprint import pprint
 from app.fbconfig import univ_list
 from app.crawling import facebook,everytime
 import requests
@@ -55,7 +54,7 @@ def facebook_crawling():
         else:
             continue
 
-    print(':::: facebook_crawling end!!! ::::')
+    print('crawling end')
 
 
 def get_old_date(timelist=None):
@@ -63,17 +62,15 @@ def get_old_date(timelist=None):
         pass
     else:
         timelist.sort()
-        for i in range(0, int(len(timelist))):
-            print(timelist[i])
         return timelist[0]
 
 
 def send_post_to_api_server(univ_name, create_date):
     print('send post to api server')
-    # url = 'http://ec2-52-23-164-26.compute-1.amazonaws.com:3000/firebase/new'
-    # param = {
-    #     'university': univ_name,
-    #     'createdDate': create_date
-    # }
-    # resp = requests.post(url, data=param)
-    # print(resp.text)
+    url = 'http://ec2-52-23-164-26.compute-1.amazonaws.com:3000/firebase/new'
+    param = {
+        'university': univ_name,
+        'createdDate': create_date
+    }
+    resp = requests.post(url, data=param)
+    print(resp.text)

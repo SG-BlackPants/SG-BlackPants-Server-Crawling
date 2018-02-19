@@ -45,7 +45,7 @@ def get_feed_images_url(content_id):
 
 
 def get_facebook_page_feed_data(page_id, univ_name, limit):
-    print('call get_facebook_page_feed_data()')
+    # print('call get_facebook_page_feed_data()')
 
     page = "/" + page_id
     token = "&access_token=%s" % access_token
@@ -88,7 +88,8 @@ def get_facebook_page_feed_data(page_id, univ_name, limit):
         print('\n get_facebook_page_feed_data error() :::: ' + e)
 
     # 데이터베이스에 insert
-    article.insert_to_database(_crawledData)
+    if num is not 0:
+        article.insert_to_database(_crawledData)
 
     # 데이터 갯수 Check
     print("count of Data : %d" % num)
@@ -98,6 +99,7 @@ def get_facebook_page_feed_data(page_id, univ_name, limit):
         count=num,
         lately_date=lately_date
     )
+
 
 def set_date_format_to_datetime(create_date=None):
     if create_date is None:

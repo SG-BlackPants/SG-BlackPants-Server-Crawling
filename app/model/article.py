@@ -55,8 +55,6 @@ class Article:
             elif community is 'everytime':
                 community_id = ''
 
-            print(community_id)
-
             try:
                 cursor = self.collection \
                         .find({'university': university, 'community': community + community_id}) \
@@ -76,8 +74,7 @@ class Article:
                 date = datetime.datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
 
             date = date.replace(tzinfo=pytz.UTC)
-            print('lately_date timeZone :: \n', date.tzinfo)
-            print('lately_date :: ', date)
+            print('lately_date :: %s ' % date)
             return date
 
     # 데이터 리스트 insert
@@ -88,5 +85,3 @@ class Article:
             self.collection.insert(data_list)
         except Exception as e:
             print(e)
-        else:
-            print('data insert success!')

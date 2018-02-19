@@ -70,11 +70,14 @@ def get_everytime_all_data(userid, password, everytime_url, univ_name):
                 except Exception as e:
                     print('get_everytime_all_data() in for :::: ', e)
 
+    print("count of Data : %d" % num)
+
     return dict(
         result='success',
         count=num,
         lately_date=lately_date
     )
+
 
 def get_board_urls(driver, url):
     driver.get(url)
