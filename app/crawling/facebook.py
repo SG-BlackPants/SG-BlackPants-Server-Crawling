@@ -3,7 +3,6 @@ from app import fbconfig
 from dateutil import parser
 from app.model.article import Article
 import requests
-import datetime
 import pytz
 
 # access_token = app_id + "|" + app_secret
@@ -60,7 +59,7 @@ def get_facebook_page_feed_data(page_id, univ_name, limit):
 
     lately_date = article.get_community_lately_data(univ_name, 'facebook', page_id)
 
-    i = 0
+    num = 0
     _crawledData = []
 
     # 예외처리
@@ -74,7 +73,7 @@ def get_facebook_page_feed_data(page_id, univ_name, limit):
                 if compare_date_with_lately_date(lately_date, created_time) is True:
                     _data = create_json_from_crawled_data(data, page_id, community_name, univ_name, created_time)
                     _crawledData.append(_data)
-                    i = i + 1
+                    num = num + 1
 
                 # 만약에 date 가 lately_date 보다 느리다면? : 이미 이전에 크롤링 한 데이터임
                 else:
@@ -92,10 +91,13 @@ def get_facebook_page_feed_data(page_id, univ_name, limit):
     article.insert_to_database(_crawledData)
 
     # 데이터 갯수 Check
-    print("count of Data : %d" % i)
+    print("count of Data : %d" % num)
 
-    return lately_date
-
+    return dict(
+        result='success',
+        count=num,
+        lately_date=lately_date
+    )
 
 def set_date_format_to_datetime(create_date=None):
     if create_date is None:

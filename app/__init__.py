@@ -16,10 +16,10 @@ app.config.update(
     CELERY_TASK_SERIALIZER='json',
     CELERY_ACCEPT_CONTENT=['json'],
     CELERY_RESULT_SERIALIZER='json',
-    CELERY_DEFAULT_QUEUE='celery',
-    CELERY_ROUTES={
-        'app.task.facebook_crawling': {'queue': 'feeds'}
-    },
+    # CELERY_DEFAULT_QUEUE='celery',
+    # CELERY_ROUTES={
+    #     'app.task.facebook_crawling': {'queue': 'feeds'}
+    # },
     CELERYBEAT_SCHEDULE={
         'facebook_crawling': {
             'task': 'app.task.facebook_crawling',

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import time
-import config
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from app.model.article import Article
+import time
+import config
 import pytz
 import datetime
 
@@ -70,13 +70,15 @@ def get_everytime_all_data(userid, password, everytime_url, univ_name):
                 except Exception as e:
                     print('get_everytime_all_data() in for :::: ', e)
 
-    # print('총 %d 개의 데이터 전달' % num)
-    return lately_date
-
+    return dict(
+        result='success',
+        count=num,
+        lately_date=lately_date
+    )
 
 def get_board_urls(driver, url):
     driver.get(url)
-    time.sleep(3)
+    time.sleep(1)
 
     html = driver.page_source
     soup = BeautifulSoup(html, 'html.parser')
