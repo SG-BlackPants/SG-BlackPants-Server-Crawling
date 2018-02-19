@@ -5,7 +5,13 @@ access_token = "EAAY5OSYVOZAMBAEpv0GuuT21gjtCagFhPEb5UAIFuZCR5J1xdItGBvaH2nmENhn
 univ_list = [
     {
         'schoolName': '경희대학교',
-        'communityList': ['482012061908784', '449006815233880'],
+        'communityList': [
+            '482012061908784',
+            '449006815233880',
+            '191418930879672',
+            '636631776456255',
+            '129566080454365'
+        ],
         'everytimeUrl': 'khu.everytime.kr',
         'user': {
             'id': 'loloara',
