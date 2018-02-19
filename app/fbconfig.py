@@ -13,9 +13,5 @@ univ_list = [
             '129566080454365'
         ],
         'everytimeUrl': 'khu.everytime.kr',
-        'user': {
-            'id': 'loloara',
-            'pw': 'whdrn3412'
-        }
     }
 ]
